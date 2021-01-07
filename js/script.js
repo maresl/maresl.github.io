@@ -87,6 +87,10 @@ class Piece {
             }
         }
     }
+
+    toString(){
+        return this.placeHolder
+    }
 }
 
 
@@ -143,6 +147,43 @@ class Pawn extends Piece {
     }
 }
 
+//Knights inherit the behavior of all chess pieces 
+//they are able to move 2 spaces perpendicular and  
+//one space the side on every turn
+class Knight extends Piece {
+    constructor(color, startXPosition, startYPosition) {
+        super(color, startXPosition, startYPosition, `N`)
+    }
+
+    validMoves(){
+        const validMoves = []
+        this.addToValidMoves(validMoves, this.currentXPosition + 2, this.currentYPosition + 1)
+        this.addToValidMoves(validMoves, this.currentXPosition + 2, this.currentYPosition - 1)
+        this.addToValidMoves(validMoves, this.currentXPosition - 2, this.currentYPosition + 1)
+        this.addToValidMoves(validMoves, this.currentXPosition - 2, this.currentYPosition - 1)
+        this.addToValidMoves(validMoves, this.currentXPosition + 1, this.currentYPosition + 2)
+        this.addToValidMoves(validMoves, this.currentXPosition - 1, this.currentYPosition + 2)
+        this.addToValidMoves(validMoves, this.currentXPosition + 1, this.currentYPosition - 2)
+        this.addToValidMoves(validMoves, this.currentXPosition - 1, this.currentYPosition - 2)
+        return validMoves
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //creates a new board if it has not been initialized before
 //empties the board if reseting for a new game
 function intiateBoard() {
@@ -179,18 +220,12 @@ function validIndex(n){
 //validMoves.push(ROW[x] + COLUMN[y])
 
 intiateBoard()
-const firstPiece = new Pawn(`WHITE`, 1, 3, `WQ`)
+const firstPiece = new Knight(`WHITE`, 1, 3)
 firstPiece.place()
+const secondPiece = new Knight(`WHITE`, 3, 4)
+secondPiece.place()
 console.log(getSquare(`B5`))
 console.log(BOARD)
 console.log(firstPiece.validMoves())
-firstPiece.move(`B6`)
-console.log(firstPiece.validMoves())
-const secondPiece = new Pawn(`BLACK`, 2, 1)
-secondPiece.place()
-const thirdPiece = new Pawn(`WHITE`, 0, 1)
-thirdPiece.place()
-console.log(firstPiece.validMoves())
-console.log(secondPiece.validMoves())
 
 
