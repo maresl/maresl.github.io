@@ -1,32 +1,51 @@
-//test console.log("hello!")
-
 //Global Constants 
 const ROW = [`A`, `B`, `C`, `D`, `E`, `F`, `G`, `H`]
 const COLUMN = [`8`, `7`, `6`, `5`, `4`, `3`, `2`, `1`]
 const BOARD = []
-const WHITE = []
-const BLACK = []
+let WHITES_TURN = true
+const GRAVEYARD = []
 
+//superclass for all chess pieces
+//saves the color of the piece, it's location as coordinates, 
+//and whether the piece is in play
+//behavior: place the piece on the board, move it if the player clicks on
+//a valid square, and moves the piece to the graveyard if it is captured
 class Piece {
     constructor(color, startXPosition, startYPosition, placeHolder) {
-        this.color = color
+        this.color = color   //`WHITE` or `BLACK`
         this.currentXPosition = startXPosition
         this.currentYPosition = startYPosition
-        this.placeHolder = placeHolder
+        this.placeHolder = this.placeHolderPrefix() + placeHolder
         this.inPlay = true
     }
 
     place(){
-        BOARD[this.currentYPosition][this.currentXPosition] = this.placeHolder
+        BOARD[this.currentYPosition][this.currentXPosition] = this
     }
 
-    move(x, y){
-        BOARD[this.currentYPosition][this.currentXPosition] = null
-        this.currentXPosition += x
-        this.currentYPosition += y
-        this.place()
+    move(square){
+        const validSquares = this.validMoves()
+        if(validSquares.indexOf(square) > -1){
+            this.captureOppenent(square)
+            BOARD[this.currentYPosition][this.currentXPosition] = null
+            this.currentXPosition = ROW.indexOf(square.charAt(0))
+            this.currentYPosition = COLUMN.indexOf(square.charAt(1))
+            this.place()
+            updateTurn()
+        } else {
+            alert(`invalid move`)
+        }
     }
 
+    captureOppenent(square){
+        const currentState = getSquare(square)
+        if(currentState !== null){
+            currentState.captured()
+            GRAVEYARD.push(currentState)
+        }
+    }
+
+    //this is a test case - override for each type of chess piece
     validMoves() {
         const validMoves = []
         if(this.currentYPosition <= 6){
@@ -47,18 +66,80 @@ class Piece {
     captured(){
         this.inPlay = false
     }
+
+    isOpponent(piece){
+        return piece.color !== this.color
+    }
+
+    placeHolderPrefix(){
+        if(this.color === `WHITE`){
+            return `W`
+        } else {
+            return `B`
+        }
+    }
+
+    addToValidMoves(validMoves, x, y) {
+        if(validIndex(x) && validIndex(y)){
+            const currentState = getSquare(ROW[x] + COLUMN[y])
+            if(currentState === null || this.isOpponent(currentState)){
+                validMoves.push(ROW[x] + COLUMN[y])
+            }
+        }
+    }
 }
 
 
-
+//Pawns inherit the behavior of all chess pieces but can only move forward 
+//pawns can move forward two squares if it is the piece's first move 
+//and only one square every turn after that
+//it is able to capture any pieces diagonal to it
 class Pawn extends Piece {
-    constructor(color, startXPosition, startYPosition, placeHolder){
-        super(color, startXPosition, startYPosition, placeHolder)
+    constructor(color, startXPosition, startYPosition){
+        super(color, startXPosition, startYPosition, `P`)
         this.firstMove = true
     }
 
     validMoves() {
-        return[]
+        const validMoves = []
+        const increment = this.getIncrement()
+        let y = this.currentYPosition + increment
+        this.addToValidMoves(validMoves, this.currentXPosition, y)
+        
+        //special case: opponent piece is diagonal to pawn
+        const xRight = this.currentXPosition + 1
+        const xLeft = this.currentXPosition - 1
+        this.addToDiagonalValidMoves(validMoves, xRight, y)
+        this.addToDiagonalValidMoves(validMoves, xLeft, y)
+        
+        //special case: first move
+        if(this.firstMove){
+            y = this.currentYPosition + (increment * 2)
+            this.addToValidMoves(validMoves, this.currentXPosition, y)
+        }
+        return validMoves
+    }
+
+    getIncrement(){
+        if(this.color === `WHITE`){
+            return -1
+        } else {
+            return 1
+        }
+    }
+
+    addToDiagonalValidMoves(validMoves, x, y) {
+        if(validIndex(x) && validIndex(y)){
+            const currentState = getSquare(ROW[x] + COLUMN[y])
+            if(currentState !== null && this.isOpponent(currentState)){
+                validMoves.push(ROW[x] + COLUMN[y])
+            }
+        }
+    }
+
+    move(square){
+        super.move(square)
+        this.firstMove = false
     }
 }
 
@@ -77,8 +158,39 @@ function intiateBoard() {
     }
 }
 
+//updates player's turn
+function updateTurn() {
+    WHITES_TURN =  !WHITES_TURN
+}
+
+//takes a square as a parameter and returns null if the square is empty
+//or the chess piece that current sits in the square
+function getSquare(square) {
+    return BOARD[COLUMN.indexOf(square.charAt(1))][ROW.indexOf(square.charAt(0))]
+}
+
+//takes an index 
+//returns true if the index is part of the board dimensions
+function validIndex(n){
+    return n >= 0 && n <= 7
+}
 
 //CALLS
+//validMoves.push(ROW[x] + COLUMN[y])
+
 intiateBoard()
-const firstPiece = new Piece(`WHITE`, 0, 0, `WQ`)
+const firstPiece = new Pawn(`WHITE`, 1, 3, `WQ`)
+firstPiece.place()
+console.log(getSquare(`B5`))
+console.log(BOARD)
+console.log(firstPiece.validMoves())
+firstPiece.move(`B6`)
+console.log(firstPiece.validMoves())
+const secondPiece = new Pawn(`BLACK`, 2, 1)
+secondPiece.place()
+const thirdPiece = new Pawn(`WHITE`, 0, 1)
+thirdPiece.place()
+console.log(firstPiece.validMoves())
+console.log(secondPiece.validMoves())
+
 
