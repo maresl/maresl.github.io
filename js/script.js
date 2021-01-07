@@ -4,6 +4,8 @@ const COLUMN = [`8`, `7`, `6`, `5`, `4`, `3`, `2`, `1`]
 const BOARD = []
 let WHITES_TURN = true
 const GRAVEYARD = []
+let WHITE_KING
+let BLACK_KING
 
 //superclass for all chess pieces
 //saves the color of the piece, it's location as coordinates, 
@@ -88,9 +90,6 @@ class Piece {
         }
     }
 
-    toString(){
-        return this.placeHolder
-    }
 }
 
 
@@ -169,7 +168,23 @@ class Knight extends Piece {
     }
 }
 
+//King inherits the bahavior of all chess pieces
+//it is able to move one square in any direction
+class King extends Piece {
+    constructor(color, startXPosition, startYPosition) {
+        super(color, startXPosition, startYPosition, `K`)
+    }
 
+    validMoves(){
+        const validMoves = []
+        for (let i = -1; i <= 1; i++){
+            for (let j = -1; j <= 1; j++){
+                this.addToValidMoves(validMoves, this.currentXPosition + i, this.currentYPosition + j)
+            }
+        }
+        return validMoves
+    }
+}
 
 
 
@@ -220,12 +235,13 @@ function validIndex(n){
 //validMoves.push(ROW[x] + COLUMN[y])
 
 intiateBoard()
-const firstPiece = new Knight(`WHITE`, 1, 3)
+const firstPiece = new King(`WHITE`, 1, 3)
 firstPiece.place()
-const secondPiece = new Knight(`WHITE`, 3, 4)
+const secondPiece = new King(`WHITE`, 0, 7)
 secondPiece.place()
-console.log(getSquare(`B5`))
+console.log(getSquare(`A1`))
 console.log(BOARD)
 console.log(firstPiece.validMoves())
+console.log(secondPiece.validMoves())
 
 
