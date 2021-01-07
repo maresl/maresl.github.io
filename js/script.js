@@ -99,7 +99,7 @@ class Piece {
 //it is able to capture any pieces diagonal to it
 class Pawn extends Piece {
     constructor(color, startXPosition, startYPosition){
-        super(color, startXPosition, startYPosition, `P`)
+        super(color, startXPosition, startYPosition, ``)
         this.firstMove = true
     }
 
@@ -165,6 +165,41 @@ class Knight extends Piece {
         this.addToValidMoves(validMoves, this.currentXPosition + 1, this.currentYPosition - 2)
         this.addToValidMoves(validMoves, this.currentXPosition - 1, this.currentYPosition - 2)
         return validMoves
+    }
+}
+
+//Bishop inherits the behavior of all chess pieces
+//is able to move diagonally forwards and backwards
+class Bishop extends Piece{
+    constructor(color, startXPosition, startYPosition) {
+        super(color, startXPosition, startYPosition, `B`)
+    }
+
+    validMoves(){
+        const validMoves = []
+        this.diagonalPathValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, 1)
+        this.diagonalPathValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, -1)
+        this.diagonalPathValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, 1)
+        this.diagonalPathValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, -1)
+        return validMoves
+    }
+
+    diagonalPathValidMoves(validMoves, xPosition, xIncrement, yPosition, yIncrement){
+        let x = xPosition + xIncrement
+        let y = yPosition + yIncrement
+        if(!(validIndex(x) && validIndex(y))){
+            return
+        }
+        const currentState = getSquare(ROW[x] + COLUMN[y])
+        if(currentState !== null){
+            if(this.isOpponent(currentState)){
+                validMoves.push(ROW[x] + COLUMN[y])
+            }
+            return
+        }
+        validMoves.push(ROW[x] + COLUMN[y])
+        this.diagonalPathValidMoves(validMoves, x, xIncrement, y, yIncrement)
+        //cases: empty square, square with ally, square with enemy, invalid square
     }
 }
 
@@ -235,13 +270,14 @@ function validIndex(n){
 //validMoves.push(ROW[x] + COLUMN[y])
 
 intiateBoard()
-const firstPiece = new King(`WHITE`, 1, 3)
+const firstPiece = new Bishop(`WHITE`, 3, 4)
 firstPiece.place()
-const secondPiece = new King(`WHITE`, 0, 7)
+const secondPiece = new Bishop(`WHITE`, 0, 7)
 secondPiece.place()
 console.log(getSquare(`A1`))
+console.log(getSquare(`D4`))
 console.log(BOARD)
-console.log(firstPiece.validMoves())
 console.log(secondPiece.validMoves())
+
 
 
