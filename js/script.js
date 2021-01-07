@@ -50,18 +50,6 @@ class Piece {
     //this is a test case - override for each type of chess piece
     validMoves() {
         const validMoves = []
-        if(this.currentYPosition <= 6){
-            validMoves.push(ROW[this.currentXPosition] + COLUMN[this.currentYPosition + 1])
-        }
-        if(this.currentYPosition >= 1){
-            validMoves.push(ROW[this.currentXPosition] + COLUMN[this.currentYPosition - 1])
-        }
-        if(this.currentXPosition <= 6){
-            validMoves.push(ROW[this.currentXPosition + 1] + COLUMN[this.currentYPosition])
-        }
-        if(this.currentXPosition >= 1){
-            validMoves.push(ROW[this.currentXPosition - 1] + COLUMN[this.currentYPosition])
-        }
         return validMoves
     }
 
@@ -220,6 +208,24 @@ class Rook extends Piece {
     }
 }
 
+//Queen inherits the behavior for all chess pieces and 
+//can move in a straight line 
+class Queen extends Piece {
+    constructor(color, startXPosition, startYPosition) {
+        super(color, startXPosition, startYPosition, `Q`)
+    }
+
+    validMoves(){
+        const validMoves = []
+        for (let i = -1; i <= 1; i++){
+            for (let j = -1; j <= 1; j++){
+                this.pathOfValidMoves(validMoves, this.currentXPosition, i, this.currentYPosition, j)
+            }
+        }
+        return validMoves
+    }
+}
+
 //King inherits the behavior of all chess pieces
 //it is able to move one square in any direction
 class King extends Piece {
@@ -287,9 +293,9 @@ function validIndex(n){
 //validMoves.push(ROW[x] + COLUMN[y])
 
 intiateBoard()
-const firstPiece = new Rook(`WHITE`, 0, 4)
+const firstPiece = new Queen(`WHITE`, 0, 4)
 firstPiece.place()
-const secondPiece = new Rook(`BLACK`, 0, 7)
+const secondPiece = new Queen(`WHITE`, 0, 7)
 secondPiece.place()
 console.log(getSquare(`A1`))
 console.log(getSquare(`A4`))
