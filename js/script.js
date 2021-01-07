@@ -90,6 +90,24 @@ class Piece {
         }
     }
 
+    pathOfValidMoves(validMoves, xPosition, xIncrement, yPosition, yIncrement){
+        let x = xPosition + xIncrement
+        let y = yPosition + yIncrement
+        if(!(validIndex(x) && validIndex(y))){
+            return
+        }
+        const currentState = getSquare(ROW[x] + COLUMN[y])
+        if(currentState !== null){
+            if(this.isOpponent(currentState)){
+                validMoves.push(ROW[x] + COLUMN[y])
+            }
+            return
+        }
+        validMoves.push(ROW[x] + COLUMN[y])
+        this.pathOfValidMoves(validMoves, x, xIncrement, y, yIncrement)
+        //cases: empty square, square with ally, square with enemy, invalid square
+    }
+
 }
 
 
@@ -177,33 +195,32 @@ class Bishop extends Piece{
 
     validMoves(){
         const validMoves = []
-        this.diagonalPathValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, 1)
-        this.diagonalPathValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, -1)
-        this.diagonalPathValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, 1)
-        this.diagonalPathValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, -1)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, 1)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, -1)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, 1)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, -1)
         return validMoves
-    }
-
-    diagonalPathValidMoves(validMoves, xPosition, xIncrement, yPosition, yIncrement){
-        let x = xPosition + xIncrement
-        let y = yPosition + yIncrement
-        if(!(validIndex(x) && validIndex(y))){
-            return
-        }
-        const currentState = getSquare(ROW[x] + COLUMN[y])
-        if(currentState !== null){
-            if(this.isOpponent(currentState)){
-                validMoves.push(ROW[x] + COLUMN[y])
-            }
-            return
-        }
-        validMoves.push(ROW[x] + COLUMN[y])
-        this.diagonalPathValidMoves(validMoves, x, xIncrement, y, yIncrement)
-        //cases: empty square, square with ally, square with enemy, invalid square
     }
 }
 
-//King inherits the bahavior of all chess pieces
+//Rook inherits the behavior for all chess pieces and 
+//can move in a straight line 
+class Rook extends Piece {
+    constructor(color, startXPosition, startYPosition) {
+        super(color, startXPosition, startYPosition, `R`)
+    }
+
+    validMoves(){
+        const validMoves = []
+        this.pathOfValidMoves(validMoves, this.currentXPosition, 1, this.currentYPosition, 0)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, -1, this.currentYPosition, 0)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, 0, this.currentYPosition, 1)
+        this.pathOfValidMoves(validMoves, this.currentXPosition, 0, this.currentYPosition, -1)
+        return validMoves
+    }
+}
+
+//King inherits the behavior of all chess pieces
 //it is able to move one square in any direction
 class King extends Piece {
     constructor(color, startXPosition, startYPosition) {
@@ -270,13 +287,14 @@ function validIndex(n){
 //validMoves.push(ROW[x] + COLUMN[y])
 
 intiateBoard()
-const firstPiece = new Bishop(`WHITE`, 3, 4)
+const firstPiece = new Rook(`WHITE`, 0, 4)
 firstPiece.place()
-const secondPiece = new Bishop(`WHITE`, 0, 7)
+const secondPiece = new Rook(`BLACK`, 0, 7)
 secondPiece.place()
 console.log(getSquare(`A1`))
-console.log(getSquare(`D4`))
+console.log(getSquare(`A4`))
 console.log(BOARD)
+console.log(firstPiece.validMoves())
 console.log(secondPiece.validMoves())
 
 
