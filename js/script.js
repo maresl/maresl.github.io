@@ -35,7 +35,6 @@ class Piece {
             this.currentXPosition = ROW.indexOf(square.charAt(0))
             this.currentYPosition = COLUMN.indexOf(square.charAt(1))
             this.place()
-            updateTurn()
         } else {
             alert(`invalid move`)
         }
@@ -98,6 +97,9 @@ class Piece {
         //cases: empty square, square with ally, square with enemy, invalid square
     }
 
+    squareName(){
+        return ROW[this.currentXPosition] + COLUMN[this.currentYPosition]
+    }
 
 }
 
@@ -254,12 +256,6 @@ class King extends Piece {
 
 
 //Game 
-class Game {
-
-}
-
-
-
 
 
 
@@ -342,9 +338,79 @@ function validIndex(n){
     return n >= 0 && n <= 7
 }
 
+//places visual representation of board on user's screen
+function drawBoard(){
+    BOARD.forEach( row => {
+        row.forEach( square => {
+            if(square !== null){
+                $(`#${square.squareName()}`).text(`${square.placeHolder}`)
+            }
+        })
+    })
+}
+
 //CALLS
 
+
+
 intitateGame()
+drawBoard()
+
+//jQuery constants
+let currentValidMoves = []
+
+//listener for click
+$(`.col`).on(`click`, showValidMoves)
+function showValidMoves(e){
+    e.preventDefault()
+    const squareId = e.target.id
+    const $square = $(`#${squareId}`)
+    if($square.hasClass(`valid_square`)){
+        const $selectedSquare = $(`.select`)
+        $selectedSquare.text(``)
+        const piece = getSquare($selectedSquare.attr(`id`))
+        piece.move(squareId)
+        removeHighlights()
+        drawBoard()
+    } else {
+        removeHighlights()
+        const square = getSquare(squareId)
+        if(square !== null){
+            $square.addClass(`select`)
+            const possibleMoves = square.validMoves()
+            possibleMoves.forEach(validSquare => {
+                $(`#${validSquare}`).addClass(`valid_square`)
+            })
+        }
+    }
+
+
+
+
+    // console.log(piece)
+    // if(piece !== null){
+    //     $(`#${squareId}`).addClass(`select`)
+    //     currentValidMoves = piece.validMoves()
+    //     currentValidMoves.forEach( validSquare => {
+    //         $(`#${validSquare}`).addClass(`valid_square`)
+    //     })
+    // }
+    
+    //cases: user clicks on a highlighted square (blue or yellow), 
+    //      user clicks on unhighlighted square
+}
+
+function removeHighlights(){
+    $(`.container .select`).removeClass(`select`)
+    $(`.container .valid_square`).removeClass(`valid_square`)
+    
+    // $(`#${currentSelectedSquare}`).removeClass(`highlight`)
+    // currentValidMoves.forEach( square => {
+    //     $(`#${square}`).removeClass(`valid_square`)
+    // })
+}
+
+
 console.log(BOARD)
 
 
