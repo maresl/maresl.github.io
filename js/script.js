@@ -2,10 +2,12 @@
 const ROW = [`A`, `B`, `C`, `D`, `E`, `F`, `G`, `H`]
 const COLUMN = [`8`, `7`, `6`, `5`, `4`, `3`, `2`, `1`]
 const BOARD = []
-let WHITES_TURN = true
+let WHITES_TURN
 const GRAVEYARD = []
-let WHITE_KING
-let BLACK_KING
+const WHITE_ARMY = []
+let W_KING
+const BLACK_ARMY = []
+let B_KING
 
 //superclass for all chess pieces
 //saves the color of the piece, it's location as coordinates, 
@@ -96,8 +98,8 @@ class Piece {
         //cases: empty square, square with ally, square with enemy, invalid square
     }
 
-}
 
+}
 
 //Pawns inherit the behavior of all chess pieces but can only move forward 
 //pawns can move forward two squares if it is the piece's first move 
@@ -111,9 +113,9 @@ class Pawn extends Piece {
 
     validMoves() {
         const validMoves = []
-        const increment = this.getIncrement()
+        const increment = getIncrement(this.color)
         let y = this.currentYPosition + increment
-        this.addToValidMoves(validMoves, this.currentXPosition, y)
+        this.addToForwardValidMoves(validMoves, this.currentXPosition, y)
         
         //special case: opponent piece is diagonal to pawn
         const xRight = this.currentXPosition + 1
@@ -129,11 +131,12 @@ class Pawn extends Piece {
         return validMoves
     }
 
-    getIncrement(){
-        if(this.color === `WHITE`){
-            return -1
-        } else {
-            return 1
+    addToForwardValidMoves(validMoves, x, y) {
+        if(validIndex(x) && validIndex(y)){
+            const currentState = getSquare(ROW[x] + COLUMN[y])
+            if(currentState === null){
+                validMoves.push(ROW[x] + COLUMN[y])
+            }
         }
     }
 
@@ -250,7 +253,10 @@ class King extends Piece {
 
 
 
+//Game 
+class Game {
 
+}
 
 
 
@@ -272,9 +278,56 @@ function intiateBoard() {
     }
 }
 
+//creates the white player's chess pieces and places them in the correct board squares 
+function initiateArmy (army, color, row){
+    if (army.length > 0){
+        army.length = 0
+    }
+    army.push(new Rook(color, 0, row))
+    army.push(new Knight(color, 1, row))
+    army.push(new Bishop(color, 2, row))
+    army.push(new Queen(color, 3, row))
+    const king = new King(color, 4, row)
+    army.push(king)
+    army.push(new Bishop(color, 5, row))
+    army.push(new Knight(color, 6, row))
+    army.push(new Rook(color, 7, row))
+
+    const pawnRow = row + getIncrement(color)
+    for (let i = 0; i <= 7; i++){
+        army.push(new Pawn(color, i, pawnRow))
+    }
+    placeArmy(army)
+    return king
+
+}
+
+//places army on the board
+function placeArmy(army){
+    army.forEach(piece => {
+        piece.place()
+    });
+}
+
+//intitates a game board with armies
+function intitateGame() {
+    intiateBoard()
+    W_KING = initiateArmy(WHITE_ARMY, `WHITE`, 7)
+    B_KING = initiateArmy(BLACK_ARMY, `BLACK`, 0)
+}
+
 //updates player's turn
 function updateTurn() {
     WHITES_TURN =  !WHITES_TURN
+}
+
+//returns 
+function getIncrement(color){
+    if(color === `WHITE`){
+        return -1
+    } else {
+        return 1
+    }
 }
 
 //takes a square as a parameter and returns null if the square is empty
@@ -290,18 +343,9 @@ function validIndex(n){
 }
 
 //CALLS
-//validMoves.push(ROW[x] + COLUMN[y])
 
-intiateBoard()
-const firstPiece = new Queen(`WHITE`, 0, 4)
-firstPiece.place()
-const secondPiece = new Queen(`WHITE`, 0, 7)
-secondPiece.place()
-console.log(getSquare(`A1`))
-console.log(getSquare(`A4`))
+intitateGame()
 console.log(BOARD)
-console.log(firstPiece.validMoves())
-console.log(secondPiece.validMoves())
 
 
 
