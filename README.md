@@ -29,8 +29,7 @@ Instructions
 
 ## Challenges:
 
-List any challenges and how you overcame them
-Indicate any outstanding problems
+A challenge was making the single player setting as the player faces off against computer programming. The logic behind the "second player" is to randomly choose a move from the set of all possible moves. It made the game easy enough to play against kids.
 
 ## Additional information:
 
