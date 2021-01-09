@@ -20,7 +20,7 @@ class Piece {
         this.color = color   //`WHITE` or `BLACK`
         this.currentXPosition = startXPosition
         this.currentYPosition = startYPosition
-        this.placeHolder = this.placeHolderPrefix() + placeHolder
+        this.placeHolder = placeHolder
         this.inPlay = true
     }
 
@@ -117,8 +117,8 @@ class Piece {
 //and only one square every turn after that
 //it is able to capture any pieces diagonal to it
 class Pawn extends Piece {
-    constructor(color, startXPosition, startYPosition){
-        super(color, startXPosition, startYPosition, ``)
+    constructor(color, startXPosition, startYPosition, placeHolder){
+        super(color, startXPosition, startYPosition, placeHolder)
         this.firstMove = true
     }
 
@@ -170,8 +170,8 @@ class Pawn extends Piece {
 //they are able to move 2 spaces perpendicular and  
 //one space the side on every turn
 class Knight extends Piece {
-    constructor(color, startXPosition, startYPosition) {
-        super(color, startXPosition, startYPosition, `N`)
+    constructor(color, startXPosition, startYPosition, placeHolder) {
+        super(color, startXPosition, startYPosition, placeHolder)
     }
 
     validMoves(){
@@ -191,8 +191,8 @@ class Knight extends Piece {
 //Bishop inherits the behavior of all chess pieces
 //is able to move diagonally forwards and backwards
 class Bishop extends Piece{
-    constructor(color, startXPosition, startYPosition) {
-        super(color, startXPosition, startYPosition, `B`)
+    constructor(color, startXPosition, startYPosition, placeHolder) {
+        super(color, startXPosition, startYPosition, placeHolder)
     }
 
     validMoves(){
@@ -208,8 +208,8 @@ class Bishop extends Piece{
 //Rook inherits the behavior for all chess pieces and 
 //can move in a straight line 
 class Rook extends Piece {
-    constructor(color, startXPosition, startYPosition) {
-        super(color, startXPosition, startYPosition, `R`)
+    constructor(color, startXPosition, startYPosition, placeHolder) {
+        super(color, startXPosition, startYPosition, placeHolder)
     }
 
     validMoves(){
@@ -225,8 +225,8 @@ class Rook extends Piece {
 //Queen inherits the behavior for all chess pieces and 
 //can move in a straight line 
 class Queen extends Piece {
-    constructor(color, startXPosition, startYPosition) {
-        super(color, startXPosition, startYPosition, `Q`)
+    constructor(color, startXPosition, startYPosition, placeHolder) {
+        super(color, startXPosition, startYPosition, placeHolder)
     }
 
     validMoves(){
@@ -243,8 +243,8 @@ class Queen extends Piece {
 //King inherits the behavior of all chess pieces
 //it is able to move one square in any direction
 class King extends Piece {
-    constructor(color, startXPosition, startYPosition) {
-        super(color, startXPosition, startYPosition, `K`)
+    constructor(color, startXPosition, startYPosition, placeHolder) {
+        super(color, startXPosition, startYPosition, placeHolder)
     }
 
     validMoves(){
@@ -289,30 +289,46 @@ function intiateBoard() {
 }
 
 //creates the white player's chess pieces and places them in the correct board squares 
-function initiateArmy (army, color, row){
+function initiateArmy (army, color, row, piecesArray){
     if (army.length > 0){
         army.length = 0
     }
-    if(isWhite(color)){
-        const wImages = [`<div><img class="chess_piece" src="./images/Chess_kdt45.svg"></div>`]
-    }
-    army.push(new Rook(color, 0, row))
-    army.push(new Knight(color, 1, row))
-    army.push(new Bishop(color, 2, row))
-    army.push(new Queen(color, 3, row))
-    const king = new King(color, 4, row)
+    
+    army.push(new Rook(color, 0, row, piecesArray[1]))
+    army.push(new Knight(color, 1, row, piecesArray[2]))
+    army.push(new Bishop(color, 2, row, piecesArray[3]))
+    army.push(new Queen(color, 3, row, piecesArray[4]))
+    const king = new King(color, 4, row, piecesArray[5])
     army.push(king)
-    army.push(new Bishop(color, 5, row))
-    army.push(new Knight(color, 6, row))
-    army.push(new Rook(color, 7, row))
+    army.push(new Bishop(color, 5, row, piecesArray[3]))
+    army.push(new Knight(color, 6, row, piecesArray[2]))
+    army.push(new Rook(color, 7, row, piecesArray[1]))
 
     const pawnRow = row + getIncrement(color)
     for (let i = 0; i <= 7; i++){
-        army.push(new Pawn(color, i, pawnRow))
+        army.push(new Pawn(color, i, pawnRow, piecesArray[0]))
     }
     placeArmy(army)
     return king
 
+}
+
+function getWhitePieces(){
+    return [`<img class="chess_piece" src="./images/WPawn.svg"></div>`,
+            `<img class="chess_piece" src="./images/WRook.svg"></div>`,
+            `<img class="chess_piece" src="./images/WKnight.svg"></div>`, 
+            `<img class="chess_piece" src="./images/WBishop.svg"></div>`,
+            `<img class="chess_piece" src="./images/WQueen.svg"></div>`, 
+            `<img class="chess_piece" src="./images/WKing.svg"></div>`]
+}
+
+function getBlackPieces(){
+    return [`<img class="chess_piece" src="./images/BPawn.svg"></div>`,
+            `<img class="chess_piece" src="./images/BRook.svg"></div>`,
+            `<img class="chess_piece" src="./images/BKnight.svg"></div>`, 
+            `<img class="chess_piece" src="./images/BBishop.svg"></div>`,
+            `<img class="chess_piece" src="./images/BQueen.svg"></div>`, 
+            `<img class="chess_piece" src="./images/BKing.svg"></div>`]
 }
 
 //places army on the board
@@ -325,8 +341,8 @@ function placeArmy(army){
 //intitates a game board with armies
 function intitateGame() {
     intiateBoard()
-    W_KING = initiateArmy(WHITE_ARMY, `WHITE`, 7)
-    B_KING = initiateArmy(BLACK_ARMY, `BLACK`, 0)
+    W_KING = initiateArmy(WHITE_ARMY, `WHITE`, 7, getWhitePieces())
+    B_KING = initiateArmy(BLACK_ARMY, `BLACK`, 0, getBlackPieces())
     GRAVEYARD.length = 0
     WHITES_TURN = true
     GAME_OVER = false
