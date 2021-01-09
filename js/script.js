@@ -8,6 +8,7 @@ const WHITE_ARMY = []
 let W_KING
 const BLACK_ARMY = []
 let B_KING
+let GAME_OVER
 
 //superclass for all chess pieces
 //saves the color of the piece, it's location as coordinates, 
@@ -44,7 +45,6 @@ class Piece {
         const currentState = getSquare(square)
         if(currentState !== null){
             currentState.captured()
-            GRAVEYARD.push(currentState)
         }
     }
 
@@ -56,6 +56,15 @@ class Piece {
 
     captured(){
         this.inPlay = false
+        if(isWhite(this)){
+            WHITE_ARMY.splice(WHITE_ARMY.indexOf(this), 1)
+            console.log(WHITE_ARMY)
+        } else {
+            BLACK_ARMY.splice(BLACK_ARMY.indexOf(this), 1)
+            console.log(BLACK_ARMY)
+        }
+        GRAVEYARD.push(this)
+        console.log(GRAVEYARD)
     }
 
     isOpponent(piece){
@@ -128,7 +137,7 @@ class Pawn extends Piece {
         //special case: first move
         if(this.firstMove){
             y = this.currentYPosition + (increment * 2)
-            this.addToValidMoves(validMoves, this.currentXPosition, y)
+            this.addToForwardValidMoves(validMoves, this.currentXPosition, y)
         }
         return validMoves
     }
@@ -247,6 +256,11 @@ class King extends Piece {
         }
         return validMoves
     }
+
+    captured(){
+        super.captured()
+        GAME_OVER = true;
+    }
 }
 
 
@@ -279,6 +293,9 @@ function initiateArmy (army, color, row){
     if (army.length > 0){
         army.length = 0
     }
+    if(isWhite(color)){
+        const wImages = [`<div><img class="chess_piece" src="./images/Chess_kdt45.svg"></div>`]
+    }
     army.push(new Rook(color, 0, row))
     army.push(new Knight(color, 1, row))
     army.push(new Bishop(color, 2, row))
@@ -310,11 +327,28 @@ function intitateGame() {
     intiateBoard()
     W_KING = initiateArmy(WHITE_ARMY, `WHITE`, 7)
     B_KING = initiateArmy(BLACK_ARMY, `BLACK`, 0)
+    GRAVEYARD.length = 0
+    WHITES_TURN = true
+    GAME_OVER = false
+    updatePlayer()
 }
 
 //updates player's turn
 function updateTurn() {
     WHITES_TURN =  !WHITES_TURN
+    updatePlayer()
+    updateCheck()
+}
+
+function updatePlayer(){
+    const $player = $(`#player_turn`)
+    if(GAME_OVER){
+        $player.text(`Game over!`)
+    } else if(WHITES_TURN){
+        $player.text(`It is White's turn to move`)
+    } else {
+        $player.text(`It is Black's turn to move`)
+    }
 }
 
 //returns 
@@ -343,10 +377,38 @@ function drawBoard(){
     BOARD.forEach( row => {
         row.forEach( square => {
             if(square !== null){
-                $(`#${square.squareName()}`).text(`${square.placeHolder}`)
+                $(`#${square.squareName()}`).html(`${square.placeHolder}`)
             }
         })
     })
+}
+
+function isWhite(piece){
+    return piece.color === `WHITE`
+}
+
+function updateCheck(){
+    kingInCheck(W_KING, BLACK_ARMY)
+    kingInCheck(B_KING, WHITE_ARMY)
+}
+
+function kingInCheck(king, enemyArmy){
+    $(`.container .king_in_check`).removeClass(`king_in_check`)
+    const squareId = king.squareName()
+    if(enemyHasAccess(squareId, enemyArmy)){
+        $(`#${squareId}`).addClass(`king_in_check`)
+    } 
+}
+
+function enemyHasAccess(squareId, enemyArmy){
+    let found = false
+    enemyArmy.forEach(enemy => {
+        const enemyMoves = enemy.validMoves()
+        if(enemyMoves.indexOf(squareId) > -1){
+            found = true
+        }
+    })
+    return found
 }
 
 //CALLS
@@ -356,12 +418,10 @@ function drawBoard(){
 intitateGame()
 drawBoard()
 
-//jQuery constants
-let currentValidMoves = []
-
 //listener for click
-$(`.col`).on(`click`, showValidMoves)
-function showValidMoves(e){
+$(`.col`).on(`click`, handleBoardClick)
+
+function handleBoardClick(e){
     e.preventDefault()
     const squareId = e.target.id
     const $square = $(`#${squareId}`)
@@ -372,10 +432,11 @@ function showValidMoves(e){
         piece.move(squareId)
         removeHighlights()
         drawBoard()
+        updateTurn()
     } else {
         removeHighlights()
         const square = getSquare(squareId)
-        if(square !== null){
+        if(square !== null && ((isWhite(square) && WHITES_TURN) || (!isWhite(square) && !WHITES_TURN))){
             $square.addClass(`select`)
             const possibleMoves = square.validMoves()
             possibleMoves.forEach(validSquare => {
@@ -383,31 +444,11 @@ function showValidMoves(e){
             })
         }
     }
-
-
-
-
-    // console.log(piece)
-    // if(piece !== null){
-    //     $(`#${squareId}`).addClass(`select`)
-    //     currentValidMoves = piece.validMoves()
-    //     currentValidMoves.forEach( validSquare => {
-    //         $(`#${validSquare}`).addClass(`valid_square`)
-    //     })
-    // }
-    
-    //cases: user clicks on a highlighted square (blue or yellow), 
-    //      user clicks on unhighlighted square
 }
 
 function removeHighlights(){
     $(`.container .select`).removeClass(`select`)
     $(`.container .valid_square`).removeClass(`valid_square`)
-    
-    // $(`#${currentSelectedSquare}`).removeClass(`highlight`)
-    // currentValidMoves.forEach( square => {
-    //     $(`#${square}`).removeClass(`valid_square`)
-    // })
 }
 
 
