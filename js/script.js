@@ -409,7 +409,6 @@ function updateCheck(){
 }
 
 function kingInCheck(king, enemyArmy){
-    $(`.container .king_in_check`).removeClass(`king_in_check`)
     const squareId = king.squareName()
     if(enemyHasAccess(squareId, enemyArmy)){
         $(`#${squareId}`).addClass(`king_in_check`)
@@ -465,6 +464,7 @@ function handleBoardClick(e){
 function removeHighlights(){
     $(`.container .select`).removeClass(`select`)
     $(`.container .valid_square`).removeClass(`valid_square`)
+    $(`.container .king_in_check`).removeClass(`king_in_check`)
 }
 
 
